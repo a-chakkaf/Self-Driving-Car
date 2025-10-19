@@ -15,9 +15,9 @@ class Car {
 		this.control = new Control();
 	}
 
-	update() {
+	update(borders) {
 		this.#move();
-		this.sensor.update();
+		this.sensor.update(borders);
 	}
 
 	#move() {
@@ -76,7 +76,7 @@ class Car {
 
 		ctx.fill();
 		ctx.restore();
-
+		
 		this.sensor.draw(ctx);
 	}
 }
