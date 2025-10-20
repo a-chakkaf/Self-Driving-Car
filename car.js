@@ -10,7 +10,7 @@ class Car {
 		this.maxSpeed = 3;
 		this.friction = 0.05;
 		this.angle = 0;
-
+		this.damaged = false;
 		this.points = [];
 
 		this.sensor = new Sensor(this);
@@ -20,7 +20,22 @@ class Car {
 	update(borders) {
 		this.#move();
 		this.points = this.#createPolygon();
+		this.damage = this.#assessDamage(borders);
 		this.sensor.update(borders);
+	}
+
+	#assessDamage(borders){
+
+		// for (let i  = 0; i < this.points.length; i++){
+		// 	for(let j = 0; j < borders.length; j++){
+		// 		const damage = getIntersection(
+		// 			borders[j][0],
+		// 			borders[j][1],
+		// 			this.points[i], this.points[i])
+		// 	}
+
+		// }
+		j
 	}
 
 	#move() {
