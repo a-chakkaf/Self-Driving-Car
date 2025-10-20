@@ -11,12 +11,15 @@ class Car {
 		this.friction = 0.05;
 		this.angle = 0;
 
+		this.points = [];
+
 		this.sensor = new Sensor(this);
 		this.control = new Control();
 	}
 
 	update(borders) {
 		this.#move();
+		this.points = this.#createPolygon();
 		this.sensor.update(borders);
 	}
 
@@ -62,21 +65,47 @@ class Car {
 		this.y -= Math.cos(this.angle) * this.speed;
 	}
 
+	#createPolygon() {
+
+		const points = [];
+		const rad = Math.hypot(this.width, this.height) / 2;
+		const alpha = Math.atan2(this.width, this.height);
+
+		points.push({
+			x: this.x - rad * Math.sin(this.angle - alpha),
+			y: this.y - rad * Math.cos(this.angle - alpha)
+		});
+
+		points.push({
+			x: this.x - rad * Math.sin(this.angle + alpha),
+			y: this.y - rad * Math.cos(this.angle + alpha)
+		});
+
+		points.push({
+			x: this.x - rad * Math.sin(Math.PI + this.angle - alpha),
+			y: this.y - rad * Math.cos(Math.PI + this.angle - alpha)
+		});
+
+		points.push({
+			x: this.x - rad * Math.sin(Math.PI + this.angle + alpha),
+			y: this.y - rad * Math.cos(Math.PI + this.angle + alpha)
+		});
+
+		return points;
+	}
+
 	draw(ctx) {
 		ctx.save();
-		ctx.translate(this.x, this.y);
-		ctx.rotate(-this.angle);
-
 		ctx.beginPath();
-		ctx.rect(
-			-this.width / 2,
-			-this.height / 2,
-			this.width,
-			this.height)
+		
+		ctx.moveTo(this.points[0].x, this.points[0].y);
+		for(let i = 1; i < this.points.length; i++){
+			ctx.lineTo(this.points[i].x, this.points[i].y);
+		}
 
 		ctx.fill();
 		ctx.restore();
-		
+
 		this.sensor.draw(ctx);
 	}
 }
