@@ -21,7 +21,7 @@ class Sensor {
 
     #getReadings(ray, borders) {
         let touches = [];
-        for (let i = 0; i < roadBorders.length; i++) {
+        for (let i = 0; i < borders.length; i++) {
             const touch = getIntersection(
                 ray[0],
                 ray[1],
@@ -32,11 +32,14 @@ class Sensor {
                 touches.push(touch);
             }
 
-            if (touches.length == 0){
+            if (touches.length == 0) {
                 return null;
-            }else{
-                const offsets = touches.map(e=>e.offset);
+            } else {
+                const offsets = touches.map(e => e.offset);
+                const minOffset = Math.min(...offsets);
+                return touch.find(e => e.offset == minOffset);
             }
+
         }
     }
 
@@ -60,13 +63,24 @@ class Sensor {
     }
 
     draw(ctx) {
-        this.rays.forEach(ray => {
+        for (let i = 0; i < this.rayCount; i++) {
+            let end = this.rays[i][1];
+            if (this.readings[i]) {
+                end = readings[i];
+            }
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = "yellow";
-            ctx.moveTo(ray[0].x, ray[0].y);
-            ctx.lineTo(ray[1].x, ray[1].y);
+            ctx.moveTo(this.rays[i][0].x, this.rays[i][0].y);
+            ctx.lineTo(end.x, end.y);
             ctx.stroke();
-        });
+
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "black";
+            ctx.moveTo(this.rays[i][0].x, this.rays[i][0].y);
+            ctx.lineTo(this.rays[i][1].x, this.rays[i][1].y);
+            ctx.stroke();
+        };
     }
 }
