@@ -1,14 +1,23 @@
 class Control {
-    constructor() {
+    constructor(controlType) {
         this.forward = false;
         this.reverse = false;
         this.left = false;
         this.right = false;
+        this.controlType = controlType;
 
-        this.#keyboardListeners();
+        switch (this.controlType) {
+            case ("KEYS"):
+                this.#keyboardListeners();
+                break;
+            case ("DOMMY"):
+                this.forward = true;
+                break;
+        }
     }
 
     #keyboardListeners() {
+        
         document.onkeydown = (event) => {
             switch (event.key) {
                 case "ArrowLeft":
@@ -24,7 +33,6 @@ class Control {
                     this.reverse = true;
                     break;
             }
-            // console.table(this);
         };
 
         document.onkeyup = (event) => {
@@ -42,7 +50,6 @@ class Control {
                     this.reverse = false;
                     break;
             }
-        // console.table(this);
         };
     }
 }

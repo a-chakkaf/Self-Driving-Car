@@ -1,5 +1,5 @@
 class Car {
-	constructor(x, y, width, height) {
+	constructor(x, y, width, height, controlType, maxSpeed = 3) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -7,35 +7,40 @@ class Car {
 
 		this.speed = 0;
 		this.accelaration = 0.2;
-		this.maxSpeed = 3;
+		this.maxSpeed = maxSpeed;
 		this.friction = 0.05;
 		this.angle = 0;
 		this.damaged = false;
-		this.points = [];
+		this.polygon = [];
 
-		this.sensor = new Sensor(this);
-		this.control = new Control();
+		if (controlType != "DOMMY") {
+			this.sensor = new Sensor(this);
+		}
+		this.control = new Control(controlType);
 	}
 
-	update(borders) {
-		this.#move();
-		this.points = this.#createPolygon();
-		this.damage = this.#assessDamage(borders);
-		this.sensor.update(borders);
+	update(borders, traffic) {
+		if (!this.damage) {
+			this.#move();
+			this.polygon = this.#createPolygon();
+			this.damage = this.#assessDamage(borders, traffic);
+		}
+		if (this.sensor)
+			this.sensor.update(borders, traffic);
 	}
 
-	#assessDamage(borders){
-
-		// for (let i  = 0; i < this.points.length; i++){
-		// 	for(let j = 0; j < borders.length; j++){
-		// 		const damage = getIntersection(
-		// 			borders[j][0],
-		// 			borders[j][1],
-		// 			this.points[i], this.points[i])
-		// 	}
-
-		// }
-		j
+	#assessDamage(borders, traffic) {
+		for (let i = 0; i < borders.length; i++) {
+			if (polyIntersection(this.polygon, borders[i])) {
+				return true;
+			}
+		}
+		for (let i = 0; i < traffic.length; i++){
+			if (polyIntersection(this.polygon, traffic[i].polygon)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	#move() {
@@ -82,45 +87,51 @@ class Car {
 
 	#createPolygon() {
 
-		const points = [];
+		const polygon = [];
 		const rad = Math.hypot(this.width, this.height) / 2;
 		const alpha = Math.atan2(this.width, this.height);
 
-		points.push({
+		polygon.push({
 			x: this.x - rad * Math.sin(this.angle - alpha),
 			y: this.y - rad * Math.cos(this.angle - alpha)
 		});
 
-		points.push({
+		polygon.push({
 			x: this.x - rad * Math.sin(this.angle + alpha),
 			y: this.y - rad * Math.cos(this.angle + alpha)
 		});
 
-		points.push({
+		polygon.push({
 			x: this.x - rad * Math.sin(Math.PI + this.angle - alpha),
 			y: this.y - rad * Math.cos(Math.PI + this.angle - alpha)
 		});
 
-		points.push({
+		polygon.push({
 			x: this.x - rad * Math.sin(Math.PI + this.angle + alpha),
 			y: this.y - rad * Math.cos(Math.PI + this.angle + alpha)
 		});
 
-		return points;
+		return polygon;
 	}
 
-	draw(ctx) {
+	draw(ctx, color) {
+		if (this.damage) {
+			ctx.fillStyle = "gray";
+		} else {
+			ctx.fillStyle = color;
+		}
+
 		ctx.save();
 		ctx.beginPath();
-		
-		ctx.moveTo(this.points[0].x, this.points[0].y);
-		for(let i = 1; i < this.points.length; i++){
-			ctx.lineTo(this.points[i].x, this.points[i].y);
+
+		ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+		for (let i = 1; i < this.polygon.length; i++) {
+			ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
 		}
 
 		ctx.fill();
 		ctx.restore();
-
-		this.sensor.draw(ctx);
+		if (this.sensor)
+			this.sensor.draw(ctx);
 	}
 }

@@ -1,7 +1,7 @@
 class Sensor {
     constructor(car) {
         this.car = car;
-        this.rayCount = 4;
+        this.rayCount = 5;
         this.rayLength = 150;
         this.raySpread = Math.PI / 3;
 
@@ -9,21 +9,22 @@ class Sensor {
         this.readings = [];
     }
 
-    update(borders) {
+    update(borders, traffic) {
         this.#castRays();
         this.readings = [];
         for (let i = 0; i < this.rays.length; i++) {
             this.readings.push(
-                this.#getReadings(this.rays[i], borders)
+                this.#getReadings(this.rays[i], borders, traffic)
             );
         }
     }
 
-    #getReadings(ray, borders) {
+    #getReadings(ray, borders, traffic) {
         let touches = [];
-    
+        let touch;
+
         for (let i = 0; i < borders.length; i++) {
-            const touch = getIntersection(
+            touch = getIntersection(
                 ray[0],
                 ray[1],
                 borders[i][0],
@@ -31,6 +32,19 @@ class Sensor {
             );
             if (touch) {
                 touches.push(touch);
+            }
+        }
+
+        for (let i = 0; i < traffic.length; i++) {
+            for (let j = 0; j < traffic[i].polygon.length; j++) {
+                touch = getIntersection(
+                    ray[0],
+                    ray[1],
+                    traffic[i].polygon[j],
+                    traffic[i].polygon[(j + 1) % traffic[i].polygon.length]
+                )
+                if (touch)
+                    touches.push(touch);
             }
         }
 
@@ -75,7 +89,7 @@ class Sensor {
             ctx.moveTo(this.rays[i][0].x, this.rays[i][0].y);
             ctx.lineTo(end.x, end.y);
             ctx.stroke();
-            
+
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = "black";
