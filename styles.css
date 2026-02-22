@@ -24,6 +24,10 @@ button{
     background-color: lightgray;
 }
 
+#canvas{
+    background-color: rgb(255, 255, 255);
+}
+
 #networkCanvas{
     background-color: black;
 }
