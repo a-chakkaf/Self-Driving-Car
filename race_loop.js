@@ -12,7 +12,7 @@
 
 
 MARGIN = 50
-N = 20
+N = 7
 
 class track_generator {
     constructor(width, height) {
@@ -22,41 +22,35 @@ class track_generator {
     }
 
     #generateXY() {
-        let x = Math.random() * (this.width - MARGIN + 1) + MARGIN;
-        let y = Math.random() * (this.height - MARGIN + 1) + MARGIN;
-        return [x, y];
+        let val_x = Math.random() * (this.width - MARGIN + 1) + MARGIN;
+        let val_y = Math.random() * (this.height - MARGIN + 1) + MARGIN;
+        return { x: val_x, y: val_y };
     }
 
-    generateRandomNumbers() {
+    #generateRandomNumbers() {
         for (let i = 0; i < N; i++) {
             this.randomPoints.push(this.#generateXY());
         }
     }
 
     #findLeftPoint() {
-        const listX = this.randomPoints.map(innerArray => innerArray[0]);
-        // console.log(listX)
+        const listX = this.randomPoints.map(innerArray => innerArray.x);
         let min = Math.min(...listX);
-        // console.log("min", min);
-        return listX.indexOf(min);
+        return this.randomPoints[listX.indexOf(min)];
     }
 
-    drawPoint(ctx, x, y, radius = 3, color = "#FFFF00") {
+    drawPoint(ctx, p, radius = 3, color = "#FFFF00") {
         ctx.beginPath();
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
-        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
     }
 
     drawPoints(ctx) {
-        let leftP = this.#findLeftPoint();
-        // console.log(leftP);
         for (let i = 0; i < N; i++) {
-            if (i == leftP)
-                this.drawPoint(ctx, this.randomPoints[i][0], this.randomPoints[i][1], 5, "#FF0000")
-            this.drawPoint(ctx, this.randomPoints[i][0], this.randomPoints[i][1])
+            this.drawPoint(ctx, this.randomPoints[i].x, this.randomPoints[i].y)
         }
     }
 
@@ -71,7 +65,7 @@ class track_generator {
 
         for (let i = 0; i < N; i++) {
             let checking = this.randomPoints[i];
-            if (checking === current){
+            if (checking === current) {
                 continue;
             }
             if (nextPoint === current || this.#isLeftTurn(current, nextPoint, checking)) {
@@ -81,12 +75,12 @@ class track_generator {
         return nextPoint;
     }
 
-    #drawline(ctx,x1, y1, x2, y2, color = "#F0000F", lineWidth = 3) {
+    #drawline(ctx, p1, p2, color = "#F0000F", lineWidth = 3) {
         ctx.strokeStyle = color;
         ctx.lineWidth = lineWidth;
         ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
     }
 
@@ -94,15 +88,14 @@ class track_generator {
         let anchorPoint = this.#findLeftPoint();
         for (let i = 0; i < N; i++) {
             let bp = this.bestPoint(anchorPoint);
-            // console.log("bp", bp);
-            // this.drawPoint(ctx, bp[0], bp[1], 2, "#FF5FF0");
-            // this.#drawline(ctx, anchorPoint.x, anchorPoint.y, bp.x, bp.y)
+            this.drawPoint(ctx, bp, 2, "#FF5FF0");
+            this.#drawline(ctx, anchorPoint, bp);
             anchorPoint = bp;
         }
     }
 
     track_init(ctx) {
-        this.generateRandomNumbers();
+        this.#generateRandomNumbers();
         this.drawPoints(ctx);
         this.drawLines(ctx);
     }
@@ -120,4 +113,4 @@ let raceLoop = new track_generator(canvas.width, canvas.height);
 
 raceLoop.track_init(ctx);
 
-console.log(raceLoop.randomPointsoints);
+// console.log(raceLoop.randomPointsoints);
